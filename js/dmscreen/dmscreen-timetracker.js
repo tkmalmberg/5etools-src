@@ -1157,6 +1157,44 @@ class TimeTrackerRoot_Clock extends TimeTrackerComponent {
 		const $btnAddTurn = $(`<button class="ve-btn ve-btn-xs ve-btn-default" title="Add Round (6 seconds) (SHIFT for Subtract)">Add Round</button>`)
 			.click(evt => doModTime((evt.shiftKey ? -1 : 1) * this._parent.get("secondsPerRound"), {isBase: true}));
 
+		const $btnNextWatch = $(`<button class="ve-btn ve-btn-xs ve-btn-default" title="To Next Watch (Every 4th hour from 00:00)">Next Watch</button>`)
+			.click(() => {
+				const timeInfo = getTimeInfo({isBase: true});
+				const {
+					seasonInfos,
+					numHours,
+					numMinutes,
+					numSecs,
+					secsPerHour,
+					secsPerMinute,
+				} = timeInfo;
+
+				const targetSecs = secsPerHour * 4;
+				const watchHour = numHours % 4;
+				const currentWatchSecs = (secsPerHour * watchHour) + (secsPerMinute * numMinutes) + numSecs;
+				const toAdvance = targetSecs - currentWatchSecs;
+				doModTime(toAdvance, {isBase: true});
+			});
+
+		const $btnNextTurn = $(`<button class="ve-btn ve-btn-xs ve-btn-default" title="To Next Turn (Nearest 10m)">Next Turn</button>`)
+			.click(() => {
+				const timeInfo = getTimeInfo({isBase: true});
+				const {
+					seasonInfos,
+					numHours,
+					numMinutes,
+					numSecs,
+					secsPerHour,
+					secsPerMinute,
+				} = timeInfo;
+
+				const targetSecs = secsPerMinute * 10;
+				const roundMinute = numMinutes % 10;
+				const currentTurnSecs = (secsPerMinute * roundMinute) + numSecs;
+				const toAdvance = targetSecs - currentTurnSecs;
+				doModTime(toAdvance, {isBase: true});
+			});
+
 		const $wrpWeather = $(`<div class="ve-flex dm-time__wrp-weather">`);
 		this._compWeather.render($wrpWeather, this._parent);
 
@@ -1190,13 +1228,17 @@ class TimeTrackerRoot_Clock extends TimeTrackerComponent {
 				<div class="ve-flex-col">
 					<div class="ve-flex-v-center mb-2">
 						<div class="ve-flex-v-center ve-btn-group">
-							${$btnAddLongRest}${$btnAddShortRest}
+							${$btnNextWatch}
+							${$btnNextTurn}
 						</div>
 						${$btnAddTurn}
 					</div>
-					<div class="ve-flex-v-center ve-btn-group">
+					<div class="ve-flex-v-center mb-2">
+						<div class="ve-flex-v-center ve-btn-group">
+							${$btnAddLongRest}
+							${$btnAddShortRest}
+						</div>
 						${$btnNextSunrise}
-						${$btnNextDay}
 					</div>
 				</div>
 			</div>
